@@ -7,7 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://34.126.112.84:8080/api/"
+    private const val BASE_URL = "https://nenome.online/api/"
 
     val instance: ApiService by lazy {
         val logging = HttpLoggingInterceptor().apply {

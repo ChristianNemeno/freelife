@@ -15,7 +15,7 @@ class LocationHubClient(private val token: String) {
 
     fun connect() {
         hubConnection = HubConnectionBuilder
-            .create("http://34.126.112.84:8080/locationHub")
+            .create("https://nenome.online/locationHub")
             .withAccessTokenProvider(Single.just(token))
             .build()
 
