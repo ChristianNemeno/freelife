@@ -12,5 +12,7 @@ public class Group
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public bool IsPublic { get; set; } = false;
+
     public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
 }

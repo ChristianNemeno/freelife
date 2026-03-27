@@ -33,7 +33,8 @@ public class GroupsController : ControllerBase
                 g.Id,
                 g.Name,
                 g.InviteCode,
-                g.Members.Count))
+                g.Members.Count,
+                g.IsPublic))
             .ToListAsync();
 
         return Ok(groups);
@@ -55,7 +56,8 @@ public class GroupsController : ControllerBase
         {
             Name = name,
             InviteCode = inviteCode,
-            CreatedByUserId = userId
+            CreatedByUserId = userId,
+            IsPublic = request.IsPublic
         };
 
         _dbContext.Groups.Add(group);
@@ -68,7 +70,7 @@ public class GroupsController : ControllerBase
         });
         await _dbContext.SaveChangesAsync();
 
-        return Ok(new GroupResponse(group.Id, group.Name, group.InviteCode, 1));
+        return Ok(new GroupResponse(group.Id, group.Name, group.InviteCode, 1, group.IsPublic));
     }
 
     [HttpPost("join")]

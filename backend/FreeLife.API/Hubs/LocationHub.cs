@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -14,6 +15,9 @@ public class LocationHub : Hub
         // Notify everyone in the group, including the caller, that this user joined.
         await Clients.Group($"group_{groupId}")
             .SendAsync("UserJoined", Context.UserIdentifier);
+
+        var displayName = Context.User!.FindFirstValue(ClaimTypes.Name) ?? Context.UserIdentifier!;
+        await Clients.Group($"group_{groupId}").SendAsync("UserInfo", Context.UserIdentifier, displayName);
     }
 
     // Removes only this connection from the SignalR group.

@@ -146,6 +146,25 @@ cd "\$REPO_DIR"
 echo "[VM] Writing .env..."
 printf 'POSTGRES_DB=freelifedb\nPOSTGRES_USER=postgres\nPOSTGRES_PASSWORD=${POSTGRES_PASSWORD}\nJWT_KEY=${JWT_KEY}\nASPNETCORE_ENVIRONMENT=Development\n' > .env
 
+# d) Install Node.js (LTS) if not present
+if ! command -v node &>/dev/null; then
+    echo "[VM] Installing Node.js LTS..."
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+else
+    echo "[VM] Node.js already installed — skipping."
+fi
+
+# e) Build the React frontend
+echo "[VM] Building React frontend..."
+cd "\$REPO_DIR/web"
+npm install --prefer-offline
+VITE_API_URL=http://${EXTERNAL_IP}:8080 npm run build
+mkdir -p "\$REPO_DIR/backend/FreeLife.API/wwwroot"
+cp -r dist/. "\$REPO_DIR/backend/FreeLife.API/wwwroot/"
+echo "[VM] Frontend built and copied to wwwroot."
+cd "\$REPO_DIR"
+
 # g) Build and start containers
 echo "[VM] Starting containers..."
 sudo docker compose up --build -d

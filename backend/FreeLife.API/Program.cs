@@ -72,6 +72,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<GuestTokenService>();
 
 builder.Services.AddCors(options =>
 {
@@ -93,6 +94,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
