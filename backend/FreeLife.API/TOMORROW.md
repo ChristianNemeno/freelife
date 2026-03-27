@@ -93,7 +93,7 @@ docker compose ps   # both db and backend should show "running"
 sudo apt-get install -y dotnet-sdk-8.0
 cd ~/usertrack/backend/FreeLife.API
 dotnet ef database update \
-  --connection "Host=localhost;Port=5432;Database=freelifedb;Username=postgres;Password=SomeStrongPassword123!"
+  --connection "Host=localhost;Port=5433;Database=freelifedb;Username=postgres;Password=SomeStrongPassword123!"
 ```
 
 ---

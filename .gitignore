@@ -16,6 +16,7 @@ android-app/build/
 # Docker / Environment
 .env
 .env.local
+deploy.env
 docker-compose.override.yml
 
 # Visual Studio

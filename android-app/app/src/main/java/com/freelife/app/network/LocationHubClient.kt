@@ -15,7 +15,7 @@ class LocationHubClient(private val token: String) {
 
     fun connect() {
         hubConnection = HubConnectionBuilder
-            .create("http://10.0.2.2:8080/locationHub")
+            .create("http://34.126.112.84:8080/locationHub")
             .withAccessTokenProvider(Single.just(token))
             .build()
 
