@@ -26,7 +26,6 @@ services:
       - Jwt__Key=${JWT_KEY:-super-secret-dev-key-at-least-32-characters-long!}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ASPNETCORE_URLS=http://+:8080
-      - Logging__LogLevel__Microsoft.AspNetCore.Authentication=Debug
     depends_on:
       db:
         condition: service_healthy
