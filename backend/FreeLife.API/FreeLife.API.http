@@ -1,0 +1,6 @@
+@FreeLife.API_HostAddress = http://localhost:5127
+
+GET {{FreeLife.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,4 +1,4 @@
-# 📍 UserTrack — Complete Development To-Do Guide
+﻿# 📍 UserTrack — Complete Development To-Do Guide
 
 > Real-Time Location Tracking App | Android Studio Panda · C# ASP.NET Core · Docker · Google Cloud
 
@@ -31,7 +31,7 @@ Work through the phases **in order** — each one builds on the last.
 - [x] Phase 0 — Environment Setup
 - [ ] Phase 1 — Android App & Maps
 - [ ] Phase 2 — Backend & Docker Local
-- [ ] Phase 3 — App Connected to Backend
+- [x] Phase 3 — App Connected to Backend
 - [ ] Phase 4 — Real-Time Location Working
 - [ ] Phase 5 — Groups Feature Complete
 - [ ] Phase 6 — Deployed to Google Cloud
@@ -574,19 +574,19 @@ Create these files inside `Models/`:
 
 Create `Models/DTOs/` folder and add:
 
-- [ ] **AuthDTOs.cs**
+- [x] **AuthDTOs.cs**
   ```csharp
   public record RegisterRequest(string Name, string Email, string Password);
   public record LoginRequest(string Email, string Password);
   public record AuthResponse(string Token, int UserId, string Name, string Email);
   ```
-- [ ] **GroupDTOs.cs**
+- [x] **GroupDTOs.cs**
   ```csharp
   public record CreateGroupRequest(string Name);
   public record JoinGroupRequest(string InviteCode);
   public record GroupResponse(int Id, string Name, string InviteCode, int MemberCount);
   ```
-- [ ] **LocationDTOs.cs**
+- [x] **LocationDTOs.cs**
   ```csharp
   public record UpdateLocationRequest(double Latitude, double Longitude);
   public record LocationResponse(int UserId, string UserName, double Latitude, double Longitude, DateTime Timestamp);
@@ -596,10 +596,10 @@ Create `Models/DTOs/` folder and add:
 
 ## 2.5 Create the Auth Controller
 
-- [ ] Create `Controllers/AuthController.cs`:
-  - [ ] `POST /api/auth/register` — hash password with BCrypt, save user to DB, return JWT
-  - [ ] `POST /api/auth/login` — verify email/password, return JWT on success
-- [ ] Create `Services/TokenService.cs` to generate JWT tokens:
+- [x] Create `Controllers/AuthController.cs`:
+  - [x] `POST /api/auth/register` — hash password with BCrypt, save user to DB, return JWT
+  - [x] `POST /api/auth/login` — verify email/password, return JWT on success
+- [x] Create `Services/TokenService.cs` to generate JWT tokens:
   ```csharp
   public class TokenService {
       private readonly IConfiguration _config;
@@ -626,20 +626,20 @@ Create `Models/DTOs/` folder and add:
 
 ## 2.6 Create Groups & Location Controllers
 
-- [ ] Create `Controllers/GroupsController.cs`:
-  - [ ] `GET /api/groups` — get all groups for the logged-in user
-  - [ ] `POST /api/groups` — create a group, generate a random 6-char invite code
-  - [ ] `POST /api/groups/join` — join a group using an invite code
-  - [ ] `GET /api/groups/{id}/members` — get all members of a group
-- [ ] Create `Controllers/LocationController.cs`:
-  - [ ] `POST /api/location` — save the user's current location to DB
-  - [ ] `GET /api/location/{userId}` — get the last known location of a user
+- [x] Create `Controllers/GroupsController.cs`:
+  - [x] `GET /api/groups` — get all groups for the logged-in user
+  - [x] `POST /api/groups` — create a group, generate a random 6-char invite code
+  - [x] `POST /api/groups/join` — join a group using an invite code
+  - [x] `GET /api/groups/{id}/members` — get all members of a group
+- [x] Create `Controllers/LocationController.cs`:
+  - [x] `POST /api/location` — save the user's current location to DB
+  - [x] `GET /api/location/{userId}` — get the last known location of a user
 
 ---
 
 ## 2.7 Configure Program.cs
 
-- [ ] Open `Program.cs` and add the following services:
+- [x] Open `Program.cs` and add the following services:
 
 ```csharp
 // Database
@@ -669,7 +669,7 @@ builder.Services.AddCors(options => {
 });
 ```
 
-- [ ] After `var app = builder.Build();` add:
+- [x] After `var app = builder.Build();` add:
   ```csharp
   app.UseCors("AllowAll");
   app.UseAuthentication();
@@ -681,7 +681,7 @@ builder.Services.AddCors(options => {
 
 ## 2.8 Create the Dockerfile
 
-- [ ] Create `backend/Dockerfile` (in the UserTrack.API folder):
+- [x] Create `backend/Dockerfile` (in the UserTrack.API folder):
 
 ```dockerfile
 # Stage 1: Build
@@ -700,7 +700,7 @@ EXPOSE 8080
 ENTRYPOINT ["dotnet", "UserTrack.API.dll"]
 ```
 
-- [ ] Create `.dockerignore` in the same folder:
+- [x] Create `.dockerignore` in the same folder:
   ```
   bin/
   obj/
@@ -712,7 +712,7 @@ ENTRYPOINT ["dotnet", "UserTrack.API.dll"]
 
 ## 2.9 Create docker-compose.yml
 
-- [ ] Create `docker-compose.yml` in the **root** of your project (next to `android-app/` and `backend/`):
+- [x] Create `docker-compose.yml` in the **root** of your project (next to `android-app/` and `backend/`):
 
 ```yaml
 version: '3.9'
@@ -722,7 +722,7 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_DB: usertrackdb
+      POSTGRES_DB: freelifedb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: localdevpassword123
     ports:
@@ -741,7 +741,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=usertrackdb;Username=postgres;Password=localdevpassword123
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=freelifedb;Username=postgres;Password=localdevpassword123
       - Jwt__Key=super-secret-dev-key-at-least-32-characters-long!
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
@@ -867,7 +867,7 @@ docker compose up --build
 
 ## 3.1 Create the Network Layer
 
-- [ ] Create `network/ApiService.kt` — define all API calls using Retrofit:
+- [x] Create `network/ApiService.kt` — define all API calls using Retrofit:
 
 ```kotlin
 interface ApiService {
@@ -906,7 +906,7 @@ interface ApiService {
 }
 ```
 
-- [ ] Create `network/RetrofitClient.kt`:
+- [x] Create `network/RetrofitClient.kt`:
 
 ```kotlin
 object RetrofitClient {
@@ -939,20 +939,20 @@ object RetrofitClient {
 
 Create these in `model/`:
 
-- [ ] **model/AuthModels.kt**
+- [x] **model/AuthModels.kt**
   ```kotlin
   data class RegisterRequest(val name: String, val email: String, val password: String)
   data class LoginRequest(val email: String, val password: String)
   data class AuthResponse(val token: String, val userId: Int, val name: String, val email: String)
   ```
-- [ ] **model/GroupModels.kt**
+- [x] **model/GroupModels.kt**
   ```kotlin
   data class GroupResponse(val id: Int, val name: String, val inviteCode: String, val memberCount: Int)
   data class CreateGroupRequest(val name: String)
   data class JoinGroupRequest(val inviteCode: String)
   data class MemberResponse(val userId: Int, val name: String, val email: String)
   ```
-- [ ] **model/LocationModels.kt**
+- [x] **model/LocationModels.kt**
   ```kotlin
   data class UpdateLocationRequest(val latitude: Double, val longitude: Double)
   data class LocationResponse(val userId: Int, val userName: String, val latitude: Double, val longitude: Double, val timestamp: String)
@@ -962,7 +962,7 @@ Create these in `model/`:
 
 ## 3.3 Store the JWT Token Locally
 
-- [ ] Create `repository/TokenRepository.kt` using SharedPreferences:
+- [x] Create `repository/TokenRepository.kt` using SharedPreferences:
 
 ```kotlin
 class TokenRepository(private val context: Context) {
@@ -991,7 +991,7 @@ class TokenRepository(private val context: Context) {
 
 ## 3.4 Create Repositories
 
-- [ ] Create `repository/AuthRepository.kt`:
+- [x] Create `repository/AuthRepository.kt`:
 
 ```kotlin
 class AuthRepository(private val context: Context) {
@@ -1032,17 +1032,17 @@ class AuthRepository(private val context: Context) {
 }
 ```
 
-- [ ] Create `repository/GroupRepository.kt` with methods for:
-  - [ ] `getGroups()` — calls `GET /api/groups`
-  - [ ] `createGroup(name)` — calls `POST /api/groups`
-  - [ ] `joinGroup(inviteCode)` — calls `POST /api/groups/join`
-  - [ ] `getGroupMembers(groupId)` — calls `GET /api/groups/{id}/members`
+- [x] Create `repository/GroupRepository.kt` with methods for:
+  - [x] `getGroups()` — calls `GET /api/groups`
+  - [x] `createGroup(name)` — calls `POST /api/groups`
+  - [x] `joinGroup(inviteCode)` — calls `POST /api/groups/join`
+  - [x] `getGroupMembers(groupId)` — calls `GET /api/groups/{id}/members`
 
 ---
 
 ## 3.5 Create ViewModels
 
-- [ ] Create `viewmodel/AuthViewModel.kt`:
+- [x] Create `viewmodel/AuthViewModel.kt`:
 
 ```kotlin
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
@@ -1068,7 +1068,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 }
 ```
 
-- [ ] Create a simple `UiState` sealed class in `model/UiState.kt`:
+- [x] Create a simple `UiState` sealed class in `model/UiState.kt`:
 
 ```kotlin
 sealed class UiState<out T> {
@@ -1079,16 +1079,16 @@ sealed class UiState<out T> {
 }
 ```
 
-- [ ] Create `viewmodel/HomeViewModel.kt` for groups:
-  - [ ] `loadGroups()` — fetches and stores group list in a StateFlow
-  - [ ] `createGroup(name)` — creates group and refreshes list
+- [x] Create `viewmodel/HomeViewModel.kt` for groups:
+  - [x] `loadGroups()` — fetches and stores group list in a StateFlow
+  - [x] `createGroup(name)` — creates group and refreshes list
   - [ ] `joinGroup(inviteCode)` — joins group and refreshes list
 
 ---
 
 ## 3.6 Wire Up the Login Screen
 
-- [ ] Update `LoginScreen.kt` to use the `AuthViewModel`:
+- [x] Update `LoginScreen.kt` to use the `AuthViewModel`:
 
 ```kotlin
 @Composable
@@ -1139,14 +1139,14 @@ fun LoginScreen(navController: NavController) {
 }
 ```
 
-- [ ] Wire up `RegisterScreen.kt` similarly using `AuthViewModel.register()`
-- [ ] Update `HomeScreen.kt` to load and display real groups from the API
+- [x] Wire up `RegisterScreen.kt` similarly using `AuthViewModel.register()`
+- [x] Update `HomeScreen.kt` to load and display real groups from the API
 
 ---
 
 ## 3.7 Handle Auto-Login
 
-- [ ] In `MainActivity.kt`, check if the user is already logged in and skip the Login screen:
+- [x] In `MainActivity.kt`, check if the user is already logged in and skip the Login screen:
 
 ```kotlin
 val startDestination = if (TokenRepository(this).isLoggedIn()) {
@@ -1179,13 +1179,13 @@ val startDestination = if (TokenRepository(this).isLoggedIn()) {
 ## ✅ Phase 3 Complete!
 
 **Checklist before moving on:**
-- [ ] Register creates a user and navigates to Home
-- [ ] Login authenticates and navigates to Home
-- [ ] Auto-login works on app relaunch
-- [ ] Groups list loads from the real API
-- [ ] Create Group works and refreshes the list
-- [ ] Error messages display when login fails
-- [ ] Loading states show while API calls are in progress
+- [x] Register creates a user and navigates to Home
+- [x] Login authenticates and navigates to Home
+- [x] Auto-login works on app relaunch
+- [x] Groups list loads from the real API
+- [x] Create Group works and refreshes the list
+- [x] Error messages display when login fails
+- [x] Loading states show while API calls are in progress
 
 ➡️ Next: [Phase 4 — Real-Time Location with SignalR](./04-realtime-signalr.md)
 
@@ -1871,7 +1871,7 @@ myLocation.value?.let { loc ->
   - Storage: **10 GB SSD**
 - [ ] Click **Create Instance** — takes ~5 minutes
 - [ ] Once created, go to the instance → **Databases** tab → **Create Database**
-  - Name: `usertrackdb`
+  - Name: `freelifedb`
 - [ ] Note your **Connection name** shown on the instance overview page:
   ```
   e.g. usertrack-461829:asia-southeast1:usertrack-db
@@ -1941,7 +1941,7 @@ Cloud Run connects to Cloud SQL via a Unix socket — update `Program.cs` to han
 
   // Cloud Run uses a Unix socket to connect to Cloud SQL
   var connectionString = $"Host=/cloudsql/{instanceConnection};" +
-                         $"Database=usertrackdb;Username=postgres;Password={dbPassword}";
+                         $"Database=freelifedb;Username=postgres;Password={dbPassword}";
 
   builder.Services.AddDbContext<AppDbContext>(options =>
       options.UseNpgsql(connectionString));
@@ -1972,11 +1972,11 @@ Before deploying, apply EF Core migrations to Cloud SQL from your local machine:
   ```bash
   cd backend/UserTrack.API
   dotnet ef database update \
-    --connection "Host=127.0.0.1;Port=5433;Database=usertrackdb;Username=postgres;Password=YOUR_PASSWORD"
+    --connection "Host=127.0.0.1;Port=5433;Database=freelifedb;Username=postgres;Password=YOUR_PASSWORD"
   ```
 - [ ] Verify tables exist:
   ```bash
-  psql "host=127.0.0.1 port=5433 dbname=usertrackdb user=postgres password=YOUR_PASSWORD" -c "\dt"
+  psql "host=127.0.0.1 port=5433 dbname=freelifedb user=postgres password=YOUR_PASSWORD" -c "\dt"
   ```
 - [ ] Stop the proxy (Ctrl+C) when done
 
@@ -2163,7 +2163,7 @@ Cloud Run supports WebSockets but needs tuning for long-lived SignalR connection
 
 **Checklist before moving on:**
 - [ ] GCP project created with billing enabled and APIs enabled
-- [ ] Cloud SQL PostgreSQL running with `usertrackdb` database created
+- [ ] Cloud SQL PostgreSQL running with `freelifedb` database created
 - [ ] Secrets stored in GCP Secret Manager
 - [ ] Docker image pushed to Artifact Registry
 - [ ] Database migrations applied via Cloud SQL Auth Proxy

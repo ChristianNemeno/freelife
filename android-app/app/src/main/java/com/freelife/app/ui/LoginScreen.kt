@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,12 +25,35 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.freelife.app.model.UiState
+import com.freelife.app.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = viewModel()
+) {
+    val loginState by viewModel.loginState.collectAsState()
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var validationError by rememberSaveable { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(loginState) {
+        if (loginState is UiState.Success) {
+            viewModel.resetLoginState()
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
+        }
+    }
+
+    val errorMessage = when {
+        validationError != null -> validationError
+        loginState is UiState.Error -> (loginState as UiState.Error).message
+        else -> null
+    }
 
     Column(
         modifier = Modifier
@@ -46,9 +72,16 @@ fun LoginScreen(navController: NavController) {
                     text = "Welcome Back",
                     style = MaterialTheme.typography.headlineMedium
                 )
+                Text(
+                    text = "Sign in to load your groups from the FreeLife API.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = {
+                        email = it
+                        validationError = null
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Email") },
                     singleLine = true,
@@ -59,7 +92,10 @@ fun LoginScreen(navController: NavController) {
                 )
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = {
+                        password = it
+                        validationError = null
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Password") },
                     singleLine = true,
@@ -69,14 +105,39 @@ fun LoginScreen(navController: NavController) {
                         imeAction = ImeAction.Done
                     )
                 )
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
                 Button(
-                    onClick = { navController.navigate(Screen.Home.route) },
-                    modifier = Modifier.fillMaxWidth()
+                    onClick = {
+                        if (email.isBlank() || password.isBlank()) {
+                            validationError = "Email and password are required."
+                            return@Button
+                        }
+                        validationError = null
+                        viewModel.login(email, password)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = loginState !is UiState.Loading
                 ) {
-                    Text("Login")
+                    if (loginState is UiState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Login")
+                    }
                 }
                 TextButton(
-                    onClick = { navController.navigate(Screen.Register.route) },
+                    onClick = {
+                        viewModel.resetLoginState()
+                        navController.navigate(Screen.Register.route)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Register")

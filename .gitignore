@@ -1,20 +1,44 @@
 # Android
-  *.iml
-  .gradle/
-  local.properties
-  android-app/.idea/
-  android-app/build/
+*.iml
+.gradle/
+local.properties
+android-app/.idea/
+android-app/build/
 
-  # C# / .NET
-  backend/bin/
-  backend/obj/
-  backend/*.user
+# C# / .NET
+**/bin/
+**/obj/
+**/*.user
 
-  # Docker / Environment
-  .env
-  .env.local
-  docker-compose.override.yml
+# .NET SDK user-level cache
+**/.dotnet/
 
-  # General
-  .DS_Store
-  Thumbs.db
+# Docker / Environment
+.env
+.env.local
+docker-compose.override.yml
+
+# Visual Studio
+.vs/
+**/.vs/
+*.suo
+*.vssscc
+
+# Visual Studio SQLite / index files
+*.db
+*.db-shm
+*.db-wal
+*.vsidx
+
+# VS project evaluation cache
+*.metadata.v9.bin
+*.projects.v9.bin
+*.strings.v9.bin
+
+# Claude Code local settings (user-specific)
+.claude/settings.local.json
+**/.claude/settings.local.json
+
+# General
+.DS_Store
+Thumbs.db

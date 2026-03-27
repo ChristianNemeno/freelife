@@ -5,13 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.freelife.app.repository.TokenRepository
 import com.freelife.app.ui.GroupScreen
 import com.freelife.app.ui.HomeScreen
 import com.freelife.app.ui.LoginScreen
@@ -26,10 +25,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val startDestination = if (TokenRepository(this).isLoggedIn()) {
+            Screen.Home.route
+        } else {
+            Screen.Login.route
+        }
+
         setContent {
             FreeLifeTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = Screen.Login.route) {
+                NavHost(navController, startDestination = startDestination) {
                     composable(Screen.Login.route) { LoginScreen(navController) }
                     composable(Screen.Register.route) { RegisterScreen(navController) }
                     composable(Screen.Home.route) { HomeScreen(navController) }
@@ -53,15 +59,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppPreview() {
-    FreeLifeTheme {
-        val navController = rememberNavController()
-        LoginScreen(navController)
     }
 }
