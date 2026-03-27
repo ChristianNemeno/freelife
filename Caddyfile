@@ -1,0 +1,3 @@
+nenome.online, www.nenome.online {
+    reverse_proxy backend:8080
+}

@@ -82,16 +82,16 @@ else
 fi
 
 # ── Step 2: Firewall ──────────────────────────────────────────────────────────
-step "2/5 — Firewall (port 8080)"
-if gcloud compute firewall-rules describe "allow-freelife-8080" \
+step "2/5 — Firewall (ports 80 + 443)"
+if gcloud compute firewall-rules describe "allow-freelife-http" \
     --project="${GCP_PROJECT}" &>/dev/null; then
-    warn "Firewall rule 'allow-freelife-8080' already exists — skipping."
+    warn "Firewall rule 'allow-freelife-http' already exists — skipping."
 else
-    gcloud compute firewall-rules create "allow-freelife-8080" \
+    gcloud compute firewall-rules create "allow-freelife-http" \
         --project="${GCP_PROJECT}" \
-        --allow tcp:8080 \
+        --allow tcp:80,tcp:443,udp:443 \
         --target-tags=http-server \
-        --description="FreeLife API on port 8080"
+        --description="FreeLife HTTP/HTTPS via Caddy"
     info "Firewall rule created."
 fi
 
@@ -159,7 +159,7 @@ fi
 echo "[VM] Building React frontend..."
 cd "\$REPO_DIR/web"
 npm install --prefer-offline
-VITE_API_URL=http://${EXTERNAL_IP}:8080 npm run build
+VITE_API_URL=https://nenome.online npm run build
 mkdir -p "\$REPO_DIR/backend/FreeLife.API/wwwroot"
 cp -r dist/. "\$REPO_DIR/backend/FreeLife.API/wwwroot/"
 echo "[VM] Frontend built and copied to wwwroot."
@@ -192,13 +192,14 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  FreeLife deployed!${NC}"
 echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
 echo ""
-echo -e "  Swagger   →  ${YELLOW}http://${EXTERNAL_IP}:8080/swagger${NC}"
-echo -e "  API       →  ${YELLOW}http://${EXTERNAL_IP}:8080/api/${NC}"
-echo -e "  SignalR   →  ${YELLOW}http://${EXTERNAL_IP}:8080/locationHub${NC}"
+echo -e "  Web       →  ${YELLOW}https://nenome.online${NC}"
+echo -e "  Swagger   →  ${YELLOW}https://nenome.online/swagger${NC}"
+echo -e "  API       →  ${YELLOW}https://nenome.online/api/${NC}"
+echo -e "  SignalR   →  ${YELLOW}https://nenome.online/locationHub${NC}"
 echo ""
-echo "  Update Android app:"
-echo "    RetrofitClient.kt    →  BASE_URL = \"http://${EXTERNAL_IP}:8080/api/\""
-echo "    LocationHubClient.kt →  .create(\"http://${EXTERNAL_IP}:8080/locationHub\")"
+echo "  Update Android app to use HTTPS:"
+echo "    RetrofitClient.kt    →  BASE_URL = \"https://nenome.online/api/\""
+echo "    LocationHubClient.kt →  .create(\"https://nenome.online/locationHub\")"
 echo ""
 echo "  Useful commands:"
 echo "    Logs    : gcloud compute ssh ${VM_NAME} --zone=${GCP_ZONE} --project=${GCP_PROJECT} --command='cd ~/freelife && sudo docker compose logs -f backend'"
