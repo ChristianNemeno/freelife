@@ -27,7 +27,7 @@ export function MapPage() {
   const [nameMap, setNameMap] = useState<Map<string, string>>(new Map());
   const [markers, setMarkers] = useState<Map<string, LocationMarker>>(new Map());
   const [sharing, setSharing] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [unread, setUnread] = useState(0);
   const [chatInput, setChatInput] = useState('');
@@ -161,19 +161,19 @@ export function MapPage() {
 
   return (
     <div className="map-page">
-      {/* Fixed header */}
+      {/* Header */}
       <div className="map-header">
         <span className="map-group-name">{session.groupName}</span>
         <div className="map-header-actions">
+          <button className="btn btn-sm btn-ghost chat-toggle-btn" onClick={handleChatToggle}>
+            {chatOpen ? 'Hide Chat' : 'Chat'}
+            {unread > 0 && <span className="chat-badge">{unread}</span>}
+          </button>
           <button
             className={`btn btn-sm ${sharing ? 'btn-danger' : 'btn-primary'}`}
             onClick={handleSharingToggle}
           >
             {sharing ? 'Stop Sharing' : 'Share Location'}
-          </button>
-          <button className="btn btn-sm btn-ghost chat-toggle-btn" onClick={handleChatToggle}>
-            Chat
-            {unread > 0 && <span className="chat-badge">{unread}</span>}
           </button>
           <button className="btn btn-sm btn-ghost" onClick={handleLeave}>
             Leave
@@ -181,77 +181,80 @@ export function MapPage() {
         </div>
       </div>
 
-      {/* Map */}
-      <div className="map-container">
-        <MapContainer
-          center={[20, 0]}
-          zoom={2}
-          style={{ height: '100%', width: '100%' }}
-          zoomControl={true}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {markerEntries.map(([userId, marker]) => {
-            const name = nameMap.get(userId) ?? userId;
-            const icon = createMarkerIcon(name, userId);
-            return (
-              <Marker
-                key={userId}
-                position={[marker.latitude, marker.longitude]}
-                icon={icon}
-              >
-                <Tooltip permanent={false} direction="top" offset={[0, -22]}>
-                  {name}
-                </Tooltip>
-              </Marker>
-            );
-          })}
-        </MapContainer>
-      </div>
-
-      {/* Chat panel */}
-      {chatOpen && (
-        <div className="chat-panel">
-          <div className="chat-panel-header">
-            <span>Group Chat</span>
-            <button className="chat-close-btn" onClick={handleChatToggle}>✕</button>
+      {/* Body: chat left + map right */}
+      <div className="map-body">
+        {/* Chat panel — in-flow on left */}
+        {chatOpen && (
+          <div className="chat-panel">
+            <div className="chat-panel-header">
+              <span>Chat</span>
+              <button className="chat-close-btn" onClick={handleChatToggle}>✕</button>
+            </div>
+            <div className="chat-messages">
+              {messages.length === 0 && (
+                <p className="chat-empty">No messages yet.<br />Say hi!</p>
+              )}
+              {messages.map((msg) => {
+                const isOwn = msg.userId === session.guestId;
+                return (
+                  <div key={msg.id} className={`chat-msg ${isOwn ? 'chat-msg--own' : ''}`}>
+                    {!isOwn && <span className="chat-msg-name">{msg.name}</span>}
+                    <div className="chat-msg-bubble">{msg.text}</div>
+                    <span className="chat-msg-time">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="chat-input-row">
+              <input
+                className="chat-input"
+                type="text"
+                placeholder="Message…"
+                maxLength={500}
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
+              />
+              <button className="btn btn-sm btn-primary" onClick={handleSendMessage} disabled={!chatInput.trim()}>
+                Send
+              </button>
+            </div>
           </div>
-          <div className="chat-messages">
-            {messages.length === 0 && (
-              <p className="chat-empty">No messages yet. Say hi!</p>
-            )}
-            {messages.map((msg) => {
-              const isOwn = msg.userId === session.guestId;
+        )}
+
+        {/* Map */}
+        <div className="map-container">
+          <MapContainer
+            center={[20, 0]}
+            zoom={2}
+            style={{ height: '100%', width: '100%' }}
+            zoomControl={true}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {markerEntries.map(([userId, marker]) => {
+              const name = nameMap.get(userId) ?? userId;
+              const icon = createMarkerIcon(name, userId);
               return (
-                <div key={msg.id} className={`chat-msg ${isOwn ? 'chat-msg--own' : ''}`}>
-                  {!isOwn && <span className="chat-msg-name">{msg.name}</span>}
-                  <div className="chat-msg-bubble">{msg.text}</div>
-                  <span className="chat-msg-time">
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
+                <Marker
+                  key={userId}
+                  position={[marker.latitude, marker.longitude]}
+                  icon={icon}
+                >
+                  <Tooltip permanent={false} direction="top" offset={[0, -22]}>
+                    {name}
+                  </Tooltip>
+                </Marker>
               );
             })}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="chat-input-row">
-            <input
-              className="chat-input"
-              type="text"
-              placeholder="Message…"
-              maxLength={500}
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
-            />
-            <button className="btn btn-sm btn-primary" onClick={handleSendMessage} disabled={!chatInput.trim()}>
-              Send
-            </button>
-          </div>
+          </MapContainer>
         </div>
-      )}
+      </div>
     </div>
   );
 }
