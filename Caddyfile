@@ -1,10 +1,30 @@
-nenome.online, www.nenome.online {
-    reverse_proxy backend:8080 {
-        flush_interval -1
-        header_up Connection {http.request.header.Connection}
-        header_up Upgrade {http.request.header.Upgrade}
-        transport http {
-            versions 1.1
+freelife.nenome.online {
+    handle /api/* {
+        reverse_proxy backend:8080
+    }
+    handle /locationHub* {
+        reverse_proxy backend:8080 {
+            flush_interval -1
+            header_up Connection {http.request.header.Connection}
+            header_up Upgrade {http.request.header.Upgrade}
+            transport http {
+                versions 1.1
+            }
         }
+    }
+    handle {
+        reverse_proxy frontend:80
+    }
+}
+
+readright.nenome.online {
+    handle /passages* {
+        reverse_proxy readright-backend:8000
+    }
+    handle /assess* {
+        reverse_proxy readright-backend:8000
+    }
+    handle {
+        reverse_proxy readright-frontend:80
     }
 }
