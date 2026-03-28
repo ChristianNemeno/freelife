@@ -26,10 +26,10 @@ public class LocationHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"group_{groupId}");
     }
 
-    // Broadcasts the caller's latest coordinates to other users in the same group.
+    // Broadcasts the caller's latest coordinates to everyone in the same group, including themselves.
     public async Task SendLocation(string groupId, double latitude, double longitude)
     {
-        await Clients.OthersInGroup($"group_{groupId}")
+        await Clients.Group($"group_{groupId}")
             .SendAsync(
                 "ReceiveLocation",
                 Context.UserIdentifier,
