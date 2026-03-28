@@ -34,7 +34,10 @@ services:
       retries: 5
 
   frontend:
-    build: ./web
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: https://freelife.nenome.online
     expose:
       - "80"
     depends_on:
