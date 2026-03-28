@@ -8,19 +8,22 @@ interface UseSignalROptions {
   onUserInfo: (userId: string, name: string) => void;
   onUserJoined: (userId: string) => void;
   onReceiveLocation: (userId: string, lat: number, lng: number, timestamp: string) => void;
+  onReceiveMessage: (userId: string, name: string, text: string, timestamp: string) => void;
 }
 
 export function useSignalR(options: UseSignalROptions) {
   const connectionRef = useRef<HubConnection | null>(null);
-  const { token, groupId, onUserInfo, onUserJoined, onReceiveLocation } = options;
+  const { token, groupId, onUserInfo, onUserJoined, onReceiveLocation, onReceiveMessage } = options;
 
   // Stable callback refs so we don't tear down the connection on every render
   const onUserInfoRef = useRef(onUserInfo);
   const onUserJoinedRef = useRef(onUserJoined);
   const onReceiveLocationRef = useRef(onReceiveLocation);
+  const onReceiveMessageRef = useRef(onReceiveMessage);
   onUserInfoRef.current = onUserInfo;
   onUserJoinedRef.current = onUserJoined;
   onReceiveLocationRef.current = onReceiveLocation;
+  onReceiveMessageRef.current = onReceiveMessage;
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
@@ -38,6 +41,10 @@ export function useSignalR(options: UseSignalROptions) {
 
     connection.on('ReceiveLocation', (userId: string, lat: number, lng: number, timestamp: string) => {
       onReceiveLocationRef.current(userId, lat, lng, timestamp);
+    });
+
+    connection.on('ReceiveMessage', (userId: string, name: string, text: string, timestamp: string) => {
+      onReceiveMessageRef.current(userId, name, text, timestamp);
     });
 
     connectionRef.current = connection;
@@ -68,5 +75,12 @@ export function useSignalR(options: UseSignalROptions) {
     }
   }, [groupId]);
 
-  return { sendLocation };
+  const sendMessage = useCallback((text: string) => {
+    const conn = connectionRef.current;
+    if (conn && conn.state === HubConnectionState.Connected) {
+      conn.invoke('SendMessage', groupId.toString(), text).catch(console.error);
+    }
+  }, [groupId]);
+
+  return { sendLocation, sendMessage };
 }

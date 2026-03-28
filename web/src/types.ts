@@ -18,6 +18,14 @@ export interface GuestMember {
   name: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  name: string;
+  text: string;
+  timestamp: string;
+}
+
 export interface LocationMarker {
   userId: string;
   name: string;

@@ -38,6 +38,17 @@ public class LocationHub : Hub
                 DateTime.UtcNow.ToString("O"));
     }
 
+    // Broadcasts a chat message to everyone in the group (including the sender).
+    public async Task SendMessage(string groupId, string message)
+    {
+        if (string.IsNullOrWhiteSpace(message)) return;
+        var trimmed = message.Trim();
+        if (trimmed.Length > 500) trimmed = trimmed[..500];
+        var displayName = Context.User!.FindFirstValue(ClaimTypes.Name) ?? Context.UserIdentifier!;
+        await Clients.Group($"group_{groupId}")
+            .SendAsync("ReceiveMessage", Context.UserIdentifier, displayName, trimmed, DateTime.UtcNow.ToString("O"));
+    }
+
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         // SignalR automatically removes the connection from all groups on disconnect.
