@@ -1,3 +1,10 @@
 nenome.online, www.nenome.online {
-    reverse_proxy backend:8080
+    reverse_proxy backend:8080 {
+        flush_interval -1
+        header_up Connection {http.request.header.Connection}
+        header_up Upgrade {http.request.header.Upgrade}
+        transport http {
+            versions 1.1
+        }
+    }
 }
