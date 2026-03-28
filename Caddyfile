@@ -13,7 +13,7 @@ freelife.nenome.online {
         }
     }
     handle {
-        reverse_proxy frontend:80
+        reverse_proxy freelife-frontend-1:80
     }
 }
 
