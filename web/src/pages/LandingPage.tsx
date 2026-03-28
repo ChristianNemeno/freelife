@@ -69,8 +69,8 @@ export function LandingPage() {
       <header className="landing-header">
         <div className="landing-header-inner">
           <div className="logo">
-            <span className="logo-icon">FL</span>
-            <span className="logo-text">FreeLife</span>
+            <span className="logo-icon">ASNU</span>
+            <span className="logo-text">Asa na uy?!</span>
           </div>
           <p className="logo-tagline">Live location sharing for groups</p>
         </div>
