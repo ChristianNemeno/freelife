@@ -142,31 +142,12 @@ else
 fi
 cd "\$REPO_DIR"
 
-# f) Write .env — overwritten every deploy so secrets stay current
+# d) Write .env — overwritten every deploy so secrets stay current
 echo "[VM] Writing .env..."
 printf 'POSTGRES_DB=freelifedb\nPOSTGRES_USER=postgres\nPOSTGRES_PASSWORD=${POSTGRES_PASSWORD}\nJWT_KEY=${JWT_KEY}\nASPNETCORE_ENVIRONMENT=Development\n' > .env
 
-# d) Install Node.js (LTS) if not present
-if ! command -v node &>/dev/null; then
-    echo "[VM] Installing Node.js LTS..."
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-else
-    echo "[VM] Node.js already installed — skipping."
-fi
-
-# e) Build the React frontend
-echo "[VM] Building React frontend..."
-cd "\$REPO_DIR/web"
-npm install --prefer-offline
-VITE_API_URL=https://nenome.online npm run build
-mkdir -p "\$REPO_DIR/backend/FreeLife.API/wwwroot"
-cp -r dist/. "\$REPO_DIR/backend/FreeLife.API/wwwroot/"
-echo "[VM] Frontend built and copied to wwwroot."
-cd "\$REPO_DIR"
-
-# g) Build and start containers
-echo "[VM] Starting containers..."
+# e) Build and start containers (frontend built inside Docker via web/Dockerfile)
+echo "[VM] Building and starting containers..."
 sudo docker compose up --build -d
 
 echo "[VM] Done. Migrations will run automatically when the backend container starts."

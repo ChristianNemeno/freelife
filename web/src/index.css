@@ -414,6 +414,14 @@ body::before {
 
 .chat-msg-time { font-size: 0.67rem; color: var(--text-muted); padding: 0 4px; }
 
+.chat-share-row {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-share-btn { width: 100%; }
+
 .chat-input-row {
   display: flex; gap: 8px;
   padding: 10px 12px;
@@ -477,6 +485,8 @@ body::before {
   .map-header-actions {
     gap: 6px;
   }
+
+  .map-header-share-btn { display: none; }
 
   .chat-panel {
     position: absolute;

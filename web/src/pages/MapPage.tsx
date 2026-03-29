@@ -170,7 +170,7 @@ export function MapPage() {
             {unread > 0 && <span className="chat-badge">{unread}</span>}
           </button>
           <button
-            className={`btn btn-sm ${sharing ? 'btn-danger' : 'btn-primary'}`}
+            className={`btn btn-sm ${sharing ? 'btn-danger' : 'btn-primary'} map-header-share-btn`}
             onClick={handleSharingToggle}
           >
             {sharing ? 'Stop Sharing' : 'Share Location'}
@@ -207,6 +207,14 @@ export function MapPage() {
                 );
               })}
               <div ref={messagesEndRef} />
+            </div>
+            <div className="chat-share-row">
+              <button
+                className={`btn btn-sm ${sharing ? 'btn-danger' : 'btn-primary'} chat-share-btn`}
+                onClick={handleSharingToggle}
+              >
+                {sharing ? 'Stop Sharing Location' : 'Share Location'}
+              </button>
             </div>
             <div className="chat-input-row">
               <input
