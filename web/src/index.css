@@ -468,6 +468,16 @@ body::before {
 @media (max-width: 768px) {
   .map-body { position: relative; }
 
+  .map-header {
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .map-header-actions {
+    gap: 6px;
+  }
+
   .chat-panel {
     position: absolute;
     bottom: 0; left: 0; right: 0;
@@ -484,4 +494,18 @@ body::before {
   .landing-header-inner, .landing-main { padding-left: 16px; padding-right: 16px; }
   .cards-grid { grid-template-columns: 1fr; }
   .modal { padding: 24px 20px; }
+
+  .map-header {
+    padding: 6px 10px;
+  }
+
+  .map-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .map-header-actions .btn-sm {
+    padding: 5px 9px;
+    font-size: 0.76rem;
+  }
 }
