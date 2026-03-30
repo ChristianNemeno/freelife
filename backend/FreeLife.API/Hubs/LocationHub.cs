@@ -20,6 +20,7 @@ public class LocationHub : Hub
         await Clients.Group($"group_{groupId}").SendAsync("UserInfo", Context.UserIdentifier, displayName);
     }
 
+
     // Removes only this connection from the SignalR group.
     public async Task LeaveGroup(string groupId)
     {
