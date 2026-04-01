@@ -230,7 +230,7 @@ export function MapPage() {
               defaultZoom={14}
               defaultTilt={45}
               defaultHeading={0}
-              mapId="freelife-3d-map"
+              mapId="e697ea99deb4aaf99897e227"
               gestureHandling="greedy"
               disableDefaultUI={false}
               style={{ width: '100%', height: '100%' }}
