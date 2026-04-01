@@ -70,7 +70,7 @@ export function LandingPage() {
         <div className="landing-header-inner">
           <div className="logo">
             <span className="logo-icon">ASNU</span>
-            <span className="logo-text">Asa na uy?!</span>
+            <span className="logo-text">ASNU</span>
           </div>
         </div>
       </header>
@@ -82,7 +82,7 @@ export function LandingPage() {
             <span className="hero-live-dot" />
             Live
           </div>
-          <h1 className="hero-title">Where are you?!</h1>
+          <h1 className="hero-title">Asa na uy?!</h1>
           <p className="hero-description">
             Real-time group location sharing — see your friends, family, or teammates on an
             interactive map, share your location instantly, and stay connected with built-in
