@@ -2,6 +2,9 @@ freelife.nenome.online {
     handle /api/* {
         reverse_proxy freelife-backend:8080
     }
+    handle /swagger* {
+        reverse_proxy freelife-backend:8080
+    }
     handle /locationHub* {
         reverse_proxy freelife-backend:8080 {
             flush_interval -1
