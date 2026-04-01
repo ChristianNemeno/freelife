@@ -72,11 +72,42 @@ export function LandingPage() {
             <span className="logo-icon">ASNU</span>
             <span className="logo-text">Asa na uy?!</span>
           </div>
-          <p className="logo-tagline">Live location sharing for groups</p>
         </div>
       </header>
 
       <main className="landing-main">
+        {/* Hero section */}
+        <section className="hero">
+          <div className="hero-badge">
+            <span className="hero-live-dot" />
+            Live
+          </div>
+          <h1 className="hero-title">Where are you?!</h1>
+          <p className="hero-description">
+            Real-time group location sharing — see your friends, family, or teammates on an
+            interactive map, share your location instantly, and stay connected with built-in
+            group chat. No accounts needed, just join with an invite code.
+          </p>
+          <div className="hero-features">
+            <span className="feature-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              Live map
+            </span>
+            <span className="feature-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Group chat
+            </span>
+            <span className="feature-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Invite codes
+            </span>
+            <span className="feature-pill">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              No sign-up
+            </span>
+          </div>
+        </section>
+
         {/* Public groups section */}
         <section className="section">
           <h2 className="section-title">Active Groups</h2>

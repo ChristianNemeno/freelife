@@ -15,6 +15,7 @@ export function GroupCard({ group, onJoin }: GroupCardProps) {
         <div className="group-card-info">
           <h3 className="group-card-name">{group.name}</h3>
           <span className="group-card-members">
+            <span className="live-dot" />
             {group.memberCount} {group.memberCount === 1 ? 'member' : 'members'}
           </span>
         </div>
