@@ -580,6 +580,98 @@ body::before {
   user-select: none;
 }
 
+/* ── Members panel ───────────────────────────────────────────────────────── */
+.members-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: rgba(5, 8, 14, 0.65);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+}
+
+.members-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700; font-size: 0.85rem; color: var(--text);
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.members-list {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.members-list::-webkit-scrollbar { width: 3px; }
+.members-list::-webkit-scrollbar-track { background: transparent; }
+.members-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.member-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.member-item:last-child { border-bottom: none; }
+
+.member-status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-muted);
+}
+.member-status-dot--active { background: #4ade80; box-shadow: 0 0 6px #4ade8088; }
+
+.member-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.member-name {
+  font-size: 0.83rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.member-meta {
+  font-size: 0.7rem; color: var(--text-muted);
+}
+
+.member-jump-btn {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+}
+.member-jump-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* ── Members toggle badge ────────────────────────────────────────────────── */
+.members-toggle-btn { position: relative; }
+.members-badge {
+  position: absolute; top: -6px; right: -6px;
+  background: var(--accent);
+  color: #05080e; font-size: 0.62rem; font-weight: 700;
+  min-width: 17px; height: 17px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+/* ── Marker info popup ───────────────────────────────────────────────────── */
+.marker-info-content {
+  display: flex; flex-direction: column; gap: 3px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: #1a1a2e;
+  padding: 2px 0;
+  min-width: 100px;
+}
+.marker-info-content strong {
+  font-size: 0.88rem; font-weight: 700;
+}
+.marker-info-content span {
+  color: #555;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .map-body { position: relative; }
@@ -595,6 +687,17 @@ body::before {
   }
 
   .map-header-share-btn { display: none; }
+
+  .members-panel {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    max-height: 55vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    z-index: 700;
+  }
 
   .chat-panel {
     position: absolute;

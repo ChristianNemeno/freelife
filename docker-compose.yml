@@ -34,11 +34,7 @@ services:
       retries: 5
 
   frontend:
-    build:
-      context: ./web
-      args:
-        VITE_API_URL: https://freelife.nenome.online
-        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
+    image: ghcr.io/christiannemeno/freelife/frontend:latest
     expose:
       - "80"
     depends_on:
@@ -51,14 +47,14 @@ services:
           - freelife-frontend
 
   backend:
-    build: ./backend/FreeLife.API
+    image: ghcr.io/christiannemeno/freelife/backend:latest
     restart: unless-stopped
     expose:
       - "8080"
     environment:
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB:-freelifedb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-localdevpassword123}
       - Jwt__Key=${JWT_KEY:-super-secret-dev-key-at-least-32-characters-long!}
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:8080
     depends_on:
       db:

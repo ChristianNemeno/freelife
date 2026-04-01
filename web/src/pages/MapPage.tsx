@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { APIProvider, Map as GoogleMap, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, AdvancedMarker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
 import { fetchGroupMembers } from '../api';
 import { useSignalR } from '../hooks/useSignalR';
 import { useSession } from '../SessionContext';
 import type { ChatMessage, LocationMarker } from '../types';
-import { getInitials, getUserColor } from '../utils/markerUtils';
+import { getInitials, getUserColor, haversineDistance, timeAgo } from '../utils/markerUtils';
+
+function MapController({ onReady }: { onReady: (m: google.maps.Map) => void }) {
+  const map = useMap();
+  useEffect(() => { if (map) onReady(map); }, [map, onReady]);
+  return null;
+}
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
@@ -21,6 +27,11 @@ export function MapPage() {
   const [unread, setUnread] = useState(0);
   const [chatInput, setChatInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const [myPosition, setMyPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+  const [membersOpen, setMembersOpen] = useState(false);
 
   const watchIdRef = useRef<number | null>(null);
   const lastSendRef = useRef<number>(0);
@@ -97,6 +108,7 @@ export function MapPage() {
       }
       watchIdRef.current = navigator.geolocation.watchPosition(
         (pos) => {
+          setMyPosition({ lat: pos.coords.latitude, lng: pos.coords.longitude });
           const now = Date.now();
           if (now - lastSendRef.current >= 5000) {
             lastSendRef.current = now;
@@ -124,6 +136,23 @@ export function MapPage() {
       }
     };
   }, []);
+
+  const handleFitAll = () => {
+    if (!mapInstance || markers.size === 0) return;
+    const bounds = new google.maps.LatLngBounds();
+    markers.forEach((m) => bounds.extend({ lat: m.latitude, lng: m.longitude }));
+    if (myPosition) bounds.extend(myPosition);
+    mapInstance.fitBounds(bounds, 80);
+  };
+
+  const handleJumpTo = (userId: string) => {
+    const marker = markers.get(userId);
+    if (!marker || !mapInstance) return;
+    mapInstance.panTo({ lat: marker.latitude, lng: marker.longitude });
+    mapInstance.setZoom(17);
+  };
+
+  const handleMembersToggle = () => setMembersOpen((open) => !open);
 
   const handleLeave = () => {
     clearSession();
@@ -154,9 +183,21 @@ export function MapPage() {
       <div className="map-header">
         <span className="map-group-name">{session.groupName}</span>
         <div className="map-header-actions">
+          <button className="btn btn-sm btn-ghost members-toggle-btn" onClick={handleMembersToggle}>
+            {membersOpen ? 'Hide Members' : 'Members'}
+            {nameMap.size > 0 && <span className="members-badge">{nameMap.size}</span>}
+          </button>
           <button className="btn btn-sm btn-ghost chat-toggle-btn" onClick={handleChatToggle}>
             {chatOpen ? 'Hide Chat' : 'Chat'}
             {unread > 0 && <span className="chat-badge">{unread}</span>}
+          </button>
+          <button
+            className="btn btn-sm btn-ghost"
+            onClick={handleFitAll}
+            disabled={markers.size === 0}
+            title="Fit all markers"
+          >
+            Fit All
           </button>
           <button
             className={`btn btn-sm ${sharing ? 'btn-danger' : 'btn-primary'} map-header-share-btn`}
@@ -170,8 +211,52 @@ export function MapPage() {
         </div>
       </div>
 
-      {/* Body: chat left + map right */}
+      {/* Body: members + chat left + map right */}
       <div className="map-body">
+        {/* Members panel */}
+        {membersOpen && (
+          <div className="members-panel">
+            <div className="members-panel-header">
+              <span>Members ({nameMap.size})</span>
+              <button className="chat-close-btn" onClick={handleMembersToggle}>✕</button>
+            </div>
+            <div className="members-list">
+              {nameMap.size === 0 && (
+                <p className="chat-empty">No members yet.</p>
+              )}
+              {Array.from(nameMap.entries()).map(([userId, name]) => {
+                const marker = markers.get(userId);
+                const isSharing = !!marker;
+                const dist = myPosition && marker
+                  ? haversineDistance(myPosition.lat, myPosition.lng, marker.latitude, marker.longitude)
+                  : null;
+                return (
+                  <div key={userId} className="member-item">
+                    <span className={`member-status-dot ${isSharing ? 'member-status-dot--active' : ''}`} />
+                    <div className="member-info">
+                      <span className="member-name">{name}</span>
+                      {isSharing && (
+                        <span className="member-meta">
+                          {dist && <>{dist} · </>}
+                          {timeAgo(marker.updatedAt)}
+                        </span>
+                      )}
+                      {!isSharing && <span className="member-meta">Not sharing</span>}
+                    </div>
+                    <button
+                      className="btn btn-sm btn-ghost member-jump-btn"
+                      onClick={() => handleJumpTo(userId)}
+                      disabled={!isSharing}
+                    >
+                      Go
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Chat panel — in-flow on left */}
         {chatOpen && (
           <div className="chat-panel">
@@ -234,7 +319,9 @@ export function MapPage() {
               gestureHandling="greedy"
               disableDefaultUI={false}
               style={{ width: '100%', height: '100%' }}
+              onClick={() => setSelectedMarkerId(null)}
             >
+              <MapController onReady={setMapInstance} />
               {markerEntries.map(([userId, marker]) => {
                 const name = nameMap.get(userId) ?? userId;
                 const initials = getInitials(name);
@@ -244,6 +331,7 @@ export function MapPage() {
                     key={userId}
                     position={{ lat: marker.latitude, lng: marker.longitude }}
                     title={name}
+                    onClick={() => setSelectedMarkerId(userId)}
                   >
                     <div
                       className="marker-bubble"
@@ -254,6 +342,25 @@ export function MapPage() {
                   </AdvancedMarker>
                 );
               })}
+              {selectedMarkerId && markers.has(selectedMarkerId) && (() => {
+                const m = markers.get(selectedMarkerId)!;
+                const name = nameMap.get(selectedMarkerId) ?? selectedMarkerId;
+                const dist = myPosition
+                  ? haversineDistance(myPosition.lat, myPosition.lng, m.latitude, m.longitude)
+                  : null;
+                return (
+                  <InfoWindow
+                    position={{ lat: m.latitude, lng: m.longitude }}
+                    onCloseClick={() => setSelectedMarkerId(null)}
+                  >
+                    <div className="marker-info-content">
+                      <strong>{name}</strong>
+                      <span>{timeAgo(m.updatedAt)}</span>
+                      {dist && <span>{dist} away</span>}
+                    </div>
+                  </InfoWindow>
+                );
+              })()}
             </GoogleMap>
           </APIProvider>
         </div>
