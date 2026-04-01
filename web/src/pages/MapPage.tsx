@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { APIProvider, Map as GoogleMap, AdvancedMarker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import { APIProvider, Map as GoogleMap, AdvancedMarker, InfoWindow, Polyline, useMap } from '@vis.gl/react-google-maps';
 import { fetchGroupMembers } from '../api';
 import { useSignalR } from '../hooks/useSignalR';
 import { useSession } from '../SessionContext';
@@ -32,9 +32,13 @@ export function MapPage() {
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const [membersOpen, setMembersOpen] = useState(false);
+  const [locationHistory, setLocationHistory] = useState<Map<string, Array<{ lat: number; lng: number }>>>(new Map());
+  const [followMe, setFollowMe] = useState(false);
+  const [routeUserId, setRouteUserId] = useState<string | null>(null);
 
   const watchIdRef = useRef<number | null>(null);
   const lastSendRef = useRef<number>(0);
+  const directionsRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
 
   // Redirect if no session
   useEffect(() => {
@@ -88,6 +92,12 @@ export function MapPage() {
       next.set(userId, { userId, name: '', latitude: lat, longitude: lng, updatedAt: timestamp });
       return next;
     });
+    setLocationHistory((prev) => {
+      const next = new Map(prev);
+      const history = next.get(userId) ?? [];
+      next.set(userId, [...history, { lat, lng }].slice(-50));
+      return next;
+    });
   }, []);
 
   const { sendLocation, sendMessage } = useSignalR({
@@ -137,6 +147,35 @@ export function MapPage() {
     };
   }, []);
 
+  // Follow me: pan to own position whenever it updates
+  useEffect(() => {
+    if (followMe && myPosition && mapInstance) {
+      mapInstance.panTo(myPosition);
+    }
+  }, [followMe, myPosition, mapInstance]);
+
+  // Cancel follow me when user manually drags the map
+  useEffect(() => {
+    if (!mapInstance || !followMe) return;
+    const listener = mapInstance.addListener('dragstart', () => setFollowMe(false));
+    return () => google.maps.event.removeListener(listener);
+  }, [mapInstance, followMe]);
+
+  // Setup DirectionsRenderer once map is ready
+  useEffect(() => {
+    if (!mapInstance) return;
+    const renderer = new google.maps.DirectionsRenderer({
+      suppressMarkers: true,
+      polylineOptions: { strokeColor: '#38bdf8', strokeWeight: 5, strokeOpacity: 0.85 },
+    });
+    renderer.setMap(mapInstance);
+    directionsRendererRef.current = renderer;
+    return () => {
+      renderer.setMap(null);
+      directionsRendererRef.current = null;
+    };
+  }, [mapInstance]);
+
   const handleFitAll = () => {
     if (!mapInstance || markers.size === 0) return;
     const bounds = new google.maps.LatLngBounds();
@@ -148,8 +187,37 @@ export function MapPage() {
   const handleJumpTo = (userId: string) => {
     const marker = markers.get(userId);
     if (!marker || !mapInstance) return;
-    mapInstance.panTo({ lat: marker.latitude, lng: marker.longitude });
-    mapInstance.setZoom(17);
+
+    if (myPosition && directionsRendererRef.current) {
+      const service = new google.maps.DirectionsService();
+      service.route(
+        {
+          origin: myPosition,
+          destination: { lat: marker.latitude, lng: marker.longitude },
+          travelMode: google.maps.TravelMode.WALKING,
+        },
+        (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK && result) {
+            directionsRendererRef.current!.setDirections(result);
+            setRouteUserId(userId);
+          } else {
+            mapInstance.panTo({ lat: marker.latitude, lng: marker.longitude });
+            mapInstance.setZoom(17);
+          }
+        }
+      );
+    } else {
+      mapInstance.panTo({ lat: marker.latitude, lng: marker.longitude });
+      mapInstance.setZoom(17);
+    }
+  };
+
+  const clearRoute = () => {
+    if (directionsRendererRef.current && mapInstance) {
+      directionsRendererRef.current.setMap(null);
+      directionsRendererRef.current.setMap(mapInstance);
+    }
+    setRouteUserId(null);
   };
 
   const handleMembersToggle = () => setMembersOpen((open) => !open);
@@ -199,6 +267,19 @@ export function MapPage() {
           >
             Fit All
           </button>
+          <button
+            className={`btn btn-sm ${followMe ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={() => setFollowMe((f) => !f)}
+            disabled={!sharing}
+            title={sharing ? 'Follow your position on the map' : 'Start sharing location first'}
+          >
+            {followMe ? 'Following' : 'Follow Me'}
+          </button>
+          {routeUserId && (
+            <button className="btn btn-sm btn-ghost" onClick={clearRoute} title="Clear route">
+              Clear Route
+            </button>
+          )}
           <button
             className={`btn btn-sm ${sharing ? 'btn-danger' : 'btn-primary'} map-header-share-btn`}
             onClick={handleSharingToggle}
@@ -322,6 +403,17 @@ export function MapPage() {
               onClick={() => setSelectedMarkerId(null)}
             >
               <MapController onReady={setMapInstance} />
+              {Array.from(locationHistory.entries()).map(([userId, path]) =>
+                path.length >= 2 ? (
+                  <Polyline
+                    key={`trail-${userId}`}
+                    path={path}
+                    strokeColor={getUserColor(userId)}
+                    strokeWeight={3}
+                    strokeOpacity={0.55}
+                  />
+                ) : null
+              )}
               {markerEntries.map(([userId, marker]) => {
                 const name = nameMap.get(userId) ?? userId;
                 const initials = getInitials(name);
