@@ -1,24 +1,13 @@
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MapContainer, Marker, TileLayer, Tooltip } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
+import { APIProvider, Map as GoogleMap, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { fetchGroupMembers } from '../api';
 import { useSignalR } from '../hooks/useSignalR';
 import { useSession } from '../SessionContext';
 import type { ChatMessage, LocationMarker } from '../types';
 import { getInitials, getUserColor } from '../utils/markerUtils';
 
-function createMarkerIcon(name: string, userId: string): L.DivIcon {
-  const color = getUserColor(userId);
-  const initials = getInitials(name);
-  return L.divIcon({
-    className: '',
-    html: `<div class="marker-bubble" style="background:${color}">${initials}</div>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-  });
-}
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
 export function MapPage() {
   const navigate = useNavigate();
@@ -233,34 +222,40 @@ export function MapPage() {
           </div>
         )}
 
-        {/* Map */}
+        {/* Google Map with 3D tilt */}
         <div className="map-container">
-          <MapContainer
-            center={[20, 0]}
-            zoom={2}
-            style={{ height: '100%', width: '100%' }}
-            zoomControl={true}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {markerEntries.map(([userId, marker]) => {
-              const name = nameMap.get(userId) ?? userId;
-              const icon = createMarkerIcon(name, userId);
-              return (
-                <Marker
-                  key={userId}
-                  position={[marker.latitude, marker.longitude]}
-                  icon={icon}
-                >
-                  <Tooltip permanent={false} direction="top" offset={[0, -22]}>
-                    {name}
-                  </Tooltip>
-                </Marker>
-              );
-            })}
-          </MapContainer>
+          <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+            <GoogleMap
+              defaultCenter={{ lat: 10.3157, lng: 123.8854 }}
+              defaultZoom={14}
+              defaultTilt={45}
+              defaultHeading={0}
+              mapId="freelife-3d-map"
+              gestureHandling="greedy"
+              disableDefaultUI={false}
+              style={{ width: '100%', height: '100%' }}
+            >
+              {markerEntries.map(([userId, marker]) => {
+                const name = nameMap.get(userId) ?? userId;
+                const initials = getInitials(name);
+                const color = getUserColor(userId);
+                return (
+                  <AdvancedMarker
+                    key={userId}
+                    position={{ lat: marker.latitude, lng: marker.longitude }}
+                    title={name}
+                  >
+                    <div
+                      className="marker-bubble"
+                      style={{ background: color }}
+                    >
+                      {initials}
+                    </div>
+                  </AdvancedMarker>
+                );
+              })}
+            </GoogleMap>
+          </APIProvider>
         </div>
       </div>
     </div>

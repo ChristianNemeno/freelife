@@ -38,6 +38,7 @@ services:
       context: ./web
       args:
         VITE_API_URL: https://freelife.nenome.online
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY}
     expose:
       - "80"
     depends_on:
